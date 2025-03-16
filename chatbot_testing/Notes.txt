@@ -1,0 +1,72 @@
+Great question! Let me explain how the agent decides which function to pick from a tool, even if we haven't explicitly passed the tool_name into the _run() method.
+
+How Does the Agent Know Which Function to Pick?
+1️⃣ The Agent's Decision Process:
+When we initialize the agent, LangChain uses the tool's description and functions to decide how to answer a user's question. In essence, the agent knows which function to call based on:
+
+The Question's Content: The agent evaluates the user's question, and based on that, it selects the function that seems appropriate to fulfill the request.
+Tool's Name and Description: The agent can understand the purpose of the tool (e.g., "SQL Query Processor") and its associated methods (e.g., get_plan_devices()) based on the tool's attributes like name and description.
+2️⃣ How Does the Agent Choose the Right Function?
+In your case, even if you don't explicitly pass tool_name to _run(), the agent can still decide which function to run. This is done as part of the tool’s description and the agent’s prompt.
+
+Here's how it works:
+
+When the agent is initialized with a tool, LangChain reads the tool's description and functions.
+The question provided by the user (e.g., "What is the name of the customer who has customer ID 15?") is then passed through a prompt to the LLM (Language Model), which generates the logic and decides which function to call.
+Inside the _run() method, the agent uses logic (e.g., tool_name) to decide which function to call.
+3️⃣ How Does _run() Work in This Context?
+The _run() method in a tool is used to dynamically select the appropriate function based on certain inputs.
+
+Here’s a simple breakdown of how it might work:
+
+Agent Decides What Function to Call:
+The agent first decides that a function like get_plan_devices() will provide the correct answer based on the user's question.
+Passing the Right Parameters:
+The agent then calls the _run() method, passing the function name (tool_name, e.g., get_plan_devices) and any necessary parameters (e.g., customer_id).
+Dynamic Function Call:
+Inside the _run() method, the code checks if the tool_name matches a function in the class (hasattr(self, tool_name)). If it does, it dynamically calls the function (getattr(self, tool_name)(customer_id)).
+Here’s an updated breakdown with your specific case:
+
+Example Explanation:
+python
+Copy
+Edit
+from langchain.tools import BaseTool
+
+class SQLToolkit(BaseTool):
+    name = "SQL Query Processor"
+    description = "Retrieves customer-related data like plans, devices, and names."
+
+    def get_plan_devices(self, customer_id: int) -> str:
+        """Fetches the plan and devices for a given customer ID."""
+        return f"Customer {customer_id} has 'Premium Plan' with 'iPhone 13'."
+
+    def get_plan_name(self, customer_id: int) -> str:
+        """Fetches the plan name for a given customer ID."""
+        return f"Customer {customer_id} is on the 'Premium Plan'."
+
+    def _run(self, tool_name: str, customer_id: int):
+        """Dynamically selects and calls the appropriate function based on tool_name."""
+        # If the function exists, call it
+        if hasattr(self, tool_name):
+            return getattr(self, tool_name)(customer_id)
+        # If function not found, return an error message
+        return f"Function '{tool_name}' not found in SQLToolkit."
+How Does This Work?
+Agent Decides Which Function to Call:
+
+Suppose the user asks: "What is the name of the plan and devices for customer ID 15?"
+The agent, after evaluating the question, will decide to use get_plan_devices() because it needs both the plan name and the devices for a given customer.
+Calling _run():
+
+The agent calls _run() and passes get_plan_devices (the function name) and 15 (the customer ID) as parameters.
+_run() Executes the Right Function:
+
+Inside the _run() method, hasattr(self, tool_name) checks if the function get_plan_devices exists in SQLToolkit. Since it does, getattr(self, tool_name)(customer_id) calls the method get_plan_devices(15).
+Result:
+
+The function get_plan_devices() runs and returns:
+python
+Copy
+Edit
+"Customer 15 has 'Premium Plan' with 'iPhone 13'."

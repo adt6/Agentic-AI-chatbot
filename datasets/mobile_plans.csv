@@ -1,0 +1,6 @@
+plan_id,plan_name,price,data_limit_GB,talk_minutes,text_messages
+1,Basic Plan,20,5,500,Unlimited
+2,Standard Plan,35,10,1000,Unlimited
+3,Premium Plan,50,25,Unlimited,Unlimited
+4,Family Plan,70,50,Unlimited,Unlimited
+5,Unlimited Plan,90,Unlimited,Unlimited,Unlimited
